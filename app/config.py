@@ -21,8 +21,8 @@ class Settings(BaseSettings):
     auth_required: bool = True
 
     # ---- Gemini ----
-    gemini_model: str = "gemini-3.5-flash"  # verified against the live API at deploy
-    gemini_model_fallback: str = "gemini-2.5-flash"  # auto-retry when primary 404s/503s
+    gemini_model: str = "gemini-2.5-flash"  # verified live; this key's 3.5 quota is exhausted
+    gemini_model_fallback: str = "gemini-2.0-flash"  # auto-retry when primary 404s/503s/429s
     # False → Gemini Developer API (API key). True → Vertex AI (ADC, no key).
     use_vertexai: bool = False
     google_cloud_project: str = ""

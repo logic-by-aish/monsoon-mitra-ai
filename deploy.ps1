@@ -21,22 +21,39 @@ if (-not $exists) {
     Remove-Item $tmp.FullName
 }
 
-# 2. Firebase web config (public identifiers) - fetched live so nothing is hard-coded
+# 2. Firebase web config (public identifiers) - fetched live so nothing is hard-coded.
+# The firebase.googleapis.com API requires a quota project, so every call sends the
+# X-Goog-User-Project header (without it user creds are billed to gcloud's shared
+# project and the call 403s). Firebase Auth is optional: if the project has not had
+# Firebase added (needs a one-time Firebase ToS accept in the console), we log a
+# warning and deploy with an empty web config - the service still runs, only browser
+# sign-in is unavailable until Firebase is enabled and this script is re-run.
 $token = gcloud auth print-access-token
-$apps = Invoke-RestMethod -Uri "https://firebase.googleapis.com/v1beta1/projects/$Project/webApps" -Headers @{Authorization = "Bearer $token"}
-if (-not $apps.apps) {
-    Write-Output "No Firebase web app found - creating one..."
-    Invoke-RestMethod -Method Post -Uri "https://firebase.googleapis.com/v1beta1/projects/$Project/webApps" -Headers @{Authorization = "Bearer $token"} -ContentType "application/json" -Body '{"displayName":"MonsoonMitra Web"}' | Out-Null
-    Start-Sleep -Seconds 10
-    $apps = Invoke-RestMethod -Uri "https://firebase.googleapis.com/v1beta1/projects/$Project/webApps" -Headers @{Authorization = "Bearer $token"}
+$fbHdr = @{ Authorization = "Bearer $token"; "X-Goog-User-Project" = $Project }
+$appId = ""; $cfg = $null
+try {
+    $apps = Invoke-RestMethod -Uri "https://firebase.googleapis.com/v1beta1/projects/$Project/webApps" -Headers $fbHdr
+    if (-not $apps.apps) {
+        Write-Output "No Firebase web app found - creating one..."
+        Invoke-RestMethod -Method Post -Uri "https://firebase.googleapis.com/v1beta1/projects/$Project/webApps" -Headers $fbHdr -ContentType "application/json" -Body '{"displayName":"MonsoonMitra Web"}' | Out-Null
+        Start-Sleep -Seconds 10
+        $apps = Invoke-RestMethod -Uri "https://firebase.googleapis.com/v1beta1/projects/$Project/webApps" -Headers $fbHdr
+    }
+    $appId = $apps.apps[0].appId
+    $cfg = Invoke-RestMethod -Uri "https://firebase.googleapis.com/v1beta1/projects/$Project/webApps/$appId/config" -Headers $fbHdr
+    Write-Output "Firebase web app: $appId"
 }
-$appId = $apps.apps[0].appId
-$cfg = Invoke-RestMethod -Uri "https://firebase.googleapis.com/v1beta1/projects/$Project/webApps/$appId/config" -Headers @{Authorization = "Bearer $token"}
-Write-Output "Firebase web app: $appId"
+catch {
+    Write-Warning "Firebase web config unavailable ($($_.Exception.Message))."
+    Write-Warning "Deploying WITHOUT browser sign-in. Add Firebase in the console (https://console.firebase.google.com/), then re-run this script."
+}
 
 # 3. Deploy from source
-$envVars = "AUTH_REQUIRED=true,GEMINI_MODEL=$Model,GEMINI_MODEL_FALLBACK=$FallbackModel,FIREBASE_PROJECT_ID=$Project,FIREBASE_WEB_API_KEY=$($cfg.apiKey),FIREBASE_AUTH_DOMAIN=$($cfg.authDomain),FIREBASE_APP_ID=$appId"
-gcloud run deploy $Service --source . --region $Region --project $Project `
+$envVars = "AUTH_REQUIRED=true,GEMINI_MODEL=$Model,GEMINI_MODEL_FALLBACK=$FallbackModel,FIREBASE_PROJECT_ID=$Project"
+if ($cfg) {
+    $envVars += ",FIREBASE_WEB_API_KEY=$($cfg.apiKey),FIREBASE_AUTH_DOMAIN=$($cfg.authDomain),FIREBASE_APP_ID=$appId"
+}
+gcloud run deploy $Service --source . --region $Region --project $Project --quiet `
     --allow-unauthenticated --memory 1Gi `
     --set-env-vars $envVars `
     --set-secrets "GEMINI_API_KEY=${secretName}:latest"
