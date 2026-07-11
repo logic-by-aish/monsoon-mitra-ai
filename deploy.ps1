@@ -21,11 +21,11 @@ if (-not $exists) {
     Remove-Item $tmp.FullName
 }
 
-# 2. Firebase web config (public identifiers) — fetched live so nothing is hard-coded
+# 2. Firebase web config (public identifiers) - fetched live so nothing is hard-coded
 $token = gcloud auth print-access-token
 $apps = Invoke-RestMethod -Uri "https://firebase.googleapis.com/v1beta1/projects/$Project/webApps" -Headers @{Authorization = "Bearer $token"}
 if (-not $apps.apps) {
-    Write-Output "No Firebase web app found — creating one..."
+    Write-Output "No Firebase web app found - creating one..."
     Invoke-RestMethod -Method Post -Uri "https://firebase.googleapis.com/v1beta1/projects/$Project/webApps" -Headers @{Authorization = "Bearer $token"} -ContentType "application/json" -Body '{"displayName":"MonsoonMitra Web"}' | Out-Null
     Start-Sleep -Seconds 10
     $apps = Invoke-RestMethod -Uri "https://firebase.googleapis.com/v1beta1/projects/$Project/webApps" -Headers @{Authorization = "Bearer $token"}
