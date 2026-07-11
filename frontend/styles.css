@@ -103,10 +103,6 @@ ul.citations a { color: var(--accent); }
 .auth-wrap p.sub { color: var(--muted); margin: 0 0 18px; font-size: .88rem; }
 .auth-wrap form { display: grid; gap: 10px; }
 .divider { text-align: center; color: var(--muted); font-size: .75rem; margin: 12px 0; }
-button.google {
-  width: 100%; background: #fff; color: #1f2937; font-weight: 600; border: 0;
-  padding: 11px; border-radius: 8px; cursor: pointer; font-size: .9rem;
-}
 button.test-user {
   width: 100%; background: transparent; color: var(--muted); font-weight: 600;
   border: 1px dashed #3b4a63; padding: 11px; border-radius: 8px; cursor: pointer;

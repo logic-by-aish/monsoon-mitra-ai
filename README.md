@@ -31,7 +31,7 @@ Built for **PromptWar (Google × Hack2skill) — MAIN ROUND**.
 
 ```
 Browser ──HTTPS──▶ Cloud Run (FastAPI + static frontend, asia-south1)
-  │ Firebase Auth (Email/Password + Continue with Google) → ID token
+  │ Firebase Auth (Email/Password) → ID token
   │ every /api call: Authorization: Bearer <ID token>
   ▼
 Cloud Run backend ──verify token──▶ Firebase Admin SDK (Auth)
@@ -102,7 +102,7 @@ gcloud secrets add-iam-policy-binding monsoonmitra-gemini-key --member="serviceA
 ```
 
 ### One-time Firebase Auth setup
-Firebase Console → Authentication → enable **Email/Password** *and* **Google**. (Providers can't be enabled via API — the single console step.)
+Firebase Console → Authentication → enable **Email/Password** (the one provider step that can't be done via API). A one-click **demo account** (`test@gmail.com`) is also wired into the login page for instant access.
 
 **Firestore rules** (defense in depth — server already scopes every read/write to the verified uid):
 ```

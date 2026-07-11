@@ -25,7 +25,6 @@
       </form>
 
       <div class="divider">or</div>
-      <button class="google" id="google-btn">Continue with Google</button>
       <button class="test-user" id="test-btn">Login as test user<small>test@gmail.com · demo account</small></button>
 
       <div class="switch-link" id="switch-line">
@@ -52,7 +51,6 @@
       "auth/email-already-in-use": "That email already has an account — sign in instead.",
       "auth/weak-password": "Password must be at least 6 characters.",
       "auth/invalid-email": "That doesn't look like a valid email.",
-      "auth/popup-closed-by-user": "Google sign-in was cancelled.",
       "auth/too-many-requests": "Too many attempts — wait a minute and retry.",
     };
 
@@ -85,14 +83,6 @@
         }
         window.location.replace("/app.html");
       } catch (e) { showError(e); } finally { submitBtn.disabled = false; }
-    });
-
-    document.getElementById("google-btn").addEventListener("click", async () => {
-      errBox.style.display = "none";
-      try {
-        await fb.signInWithPopup(fb.auth, new fb.GoogleAuthProvider());
-        window.location.replace("/app.html");
-      } catch (e) { showError(e); }
     });
 
     // One-click demo login. Self-healing: signs in, and recreates the account if

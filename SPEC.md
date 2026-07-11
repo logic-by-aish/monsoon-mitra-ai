@@ -2,7 +2,7 @@
 
 > **Event:** PromptWar (Google × Hack2skill) — MAIN ROUND
 > **One-liner:** MonsoonMitra.ai is a GenAI-powered companion that helps individuals, families, and communities prepare for the monsoon season with **personalized preparedness plans**, **weather-aware guidance**, **emergency checklists**, **travel advisories**, **safety recommendations**, **multilingual assistance**, and **real-time alerts** — before, during, and after severe weather events.
-> **Stack (locked):** Python + FastAPI on **Cloud Run** · **Gemini** via `google-genai` (structured output + Google Search grounding + multimodal) · **Firebase Auth** (Email/Password and Continue with Google) · **Cloud Firestore** · **Secret Manager**.
+> **Stack (locked):** Python + FastAPI on **Cloud Run** · **Gemini** via `google-genai` on **Vertex AI** (structured output + Google Search grounding + multimodal) · **Firebase Auth** (Email/Password) · **Cloud Firestore** · **Secret Manager**.
 > **Evaluation criteria (design targets):** code quality, problem-statement alignment, security, testing, Google Cloud alignment.
 
 ---
@@ -67,7 +67,7 @@ Every year the Indian monsoon displaces families, floods streets, and cuts power
 ## 6. Core flow
 
 ```
-[0] AUTH        Firebase ID token (Email/Password or Google) verified server-side
+[0] AUTH        Firebase ID token (Email/Password) verified server-side
 [1] PLAN        Gemini structured pass (personalized, phased) ∥ grounded pass (live weather brief)
                 — the two passes run concurrently (asyncio.gather); grounding and
                   response_schema cannot combine in one request, so this is 2 calls by design
@@ -122,7 +122,7 @@ users/{uid}/records/{id} → saved plans & kits
 ### Must-Have — P0
 | # | Requirement | Acceptance criteria |
 |---|---|---|
-| P0-1 | Auth: Email/Password and Google | Both sign-ins work; protected APIs → `401` without valid token. |
+| P0-1 | Auth: Email/Password | Sign-in works (plus a one-click demo account); protected APIs → `401` without a valid token. |
 | P0-2 | Personalized preparedness plan | ≥3 phased sections (before/during/after), each action with a personalized rationale, in the chosen language. |
 | P0-3 | Weather-aware guidance | Plan includes a live weather brief with ≥0 real citations; grounding failure degrades gracefully. |
 | P0-4 | Emergency checklist | Kit packed within budget; overflow listed; `within_budget` honest; readiness score 0–100. |
@@ -148,7 +148,7 @@ users/{uid}/records/{id} → saved plans & kits
 
 ```
 Browser ──HTTPS──▶ Cloud Run (FastAPI + static frontend)
-  │ Firebase Auth (Email/Password + Continue with Google) → ID token
+  │ Firebase Auth (Email/Password) → ID token
   │ every /api call: Authorization: Bearer <ID token>
   ▼
 Cloud Run backend ──verify token──▶ Firebase Admin SDK (Auth)
