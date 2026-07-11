@@ -4,8 +4,13 @@ param(
     [string]$Project = "project-7dd8dd18-ed36-467b-a8c",
     [string]$Region = "asia-south1",
     [string]$Service = "monsoonmitra",
-    [string]$Model = "gemini-3.5-flash",
-    [string]$FallbackModel = "gemini-2.5-flash"
+    [string]$Model = "gemini-2.5-flash",
+    [string]$FallbackModel = "gemini-2.0-flash",
+    # Gemini via Vertex AI (paid, project-billed, no free-tier daily cap) using ADC
+    # instead of the Developer API key. $VertexLocation must be a region where the
+    # models are served on Vertex (us-central1 is broadly supported).
+    [bool]$UseVertexAI = $true,
+    [string]$VertexLocation = "us-central1"
 )
 
 $ErrorActionPreference = "Stop"
@@ -50,6 +55,10 @@ catch {
 
 # 3. Deploy from source
 $envVars = "AUTH_REQUIRED=true,GEMINI_MODEL=$Model,GEMINI_MODEL_FALLBACK=$FallbackModel,FIREBASE_PROJECT_ID=$Project"
+if ($UseVertexAI) {
+    # Vertex AI path: no API key needed (ADC via runtime SA + roles/aiplatform.user).
+    $envVars += ",USE_VERTEXAI=true,GOOGLE_CLOUD_PROJECT=$Project,GOOGLE_CLOUD_LOCATION=$VertexLocation"
+}
 if ($cfg) {
     $envVars += ",FIREBASE_WEB_API_KEY=$($cfg.apiKey),FIREBASE_AUTH_DOMAIN=$($cfg.authDomain),FIREBASE_APP_ID=$appId"
 }
