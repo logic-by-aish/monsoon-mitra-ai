@@ -1,0 +1,13 @@
+tests/
+.claude/
+.env
+.env.*
+*.md
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.git/
+*serviceAccount*.json
+gcp-key*.json

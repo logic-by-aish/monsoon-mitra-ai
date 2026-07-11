@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MonsoonMitra.ai — Dashboard</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">🌧️ MonsoonMitra.ai
+      <small>preparedness plans · checklists · alerts · advisories · hazard scan</small>
+    </div>
+    <div class="userbox">
+      <select id="language" title="Language for all AI responses"></select>
+      <span id="user-email" class="muted"></span>
+      <button class="ghost" id="signout">Sign out</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <nav class="tabs" id="tabs">
+      <button data-tab="plan" class="active">🗺️ Preparedness Plan</button>
+      <button data-tab="kit">🎒 Emergency Kit</button>
+      <button data-tab="scan">📸 Hazard Scanner</button>
+      <button data-tab="alerts">🚨 Live Alerts</button>
+      <button data-tab="advisory">🚆 Travel Advisory</button>
+    </nav>
+
+    <!-- ================= PLAN ================= -->
+    <section class="panel" id="tab-plan">
+      <h2>Personalized preparedness plan</h2>
+      <p class="hint">A phased plan — <b>before, during and after</b> severe weather — personalized to your household, plus a live weather brief with sources.</p>
+      <form class="grid" id="plan-form">
+        <div><label>City</label><input name="city" required minlength="2" maxlength="120" placeholder="Mumbai" /></div>
+        <div><label>Adults</label><input name="adults" type="number" value="2" min="1" max="20" /></div>
+        <div><label>Children</label><input name="children" type="number" value="0" min="0" max="20" /></div>
+        <div><label>Infants</label><input name="infants" type="number" value="0" min="0" max="10" /></div>
+        <div><label>Elderly</label><input name="elderly" type="number" value="0" min="0" max="20" /></div>
+        <div><label>Pets</label><input name="pets" type="number" value="0" min="0" max="20" /></div>
+        <div><label>Home type</label>
+          <select name="home_type">
+            <option value="apartment">Apartment (upper floor)</option>
+            <option value="ground_floor">Ground floor</option>
+            <option value="independent_house">Independent house</option>
+            <option value="basement_level">Basement level</option>
+          </select>
+        </div>
+        <div class="full"><label>Special needs (medication, mobility, diet…)</label>
+          <textarea name="special_needs" maxlength="500" placeholder="e.g. my mother needs daily insulin"></textarea></div>
+        <div class="full"><button class="primary" type="submit">Generate my plan</button></div>
+      </form>
+      <div class="result" id="plan-result"></div>
+    </section>
+
+    <!-- ================= KIT ================= -->
+    <section class="panel" id="tab-kit" style="display:none">
+      <h2>Emergency checklist, packed to your budget</h2>
+      <p class="hint">Gemini suggests items for <i>your</i> family; our deterministic packer fits them to your budget — essentials first, nothing silently dropped.</p>
+      <form class="grid" id="kit-form">
+        <div><label>City</label><input name="city" required minlength="2" maxlength="120" placeholder="Pune" /></div>
+        <div><label>Budget (₹)</label><input name="budget_inr" type="number" value="3000" min="500" max="200000" /></div>
+        <div><label>Adults</label><input name="adults" type="number" value="2" min="1" max="20" /></div>
+        <div><label>Children</label><input name="children" type="number" value="0" min="0" max="20" /></div>
+        <div><label>Infants</label><input name="infants" type="number" value="0" min="0" max="10" /></div>
+        <div><label>Elderly</label><input name="elderly" type="number" value="0" min="0" max="20" /></div>
+        <div><label>Pets</label><input name="pets" type="number" value="0" min="0" max="20" /></div>
+        <div class="full"><label>Notes (diet, medication…)</label>
+          <textarea name="notes" maxlength="500" placeholder="e.g. vegetarian, one member on BP medication"></textarea></div>
+        <div class="full"><button class="primary" type="submit">Build my kit</button></div>
+      </form>
+      <div class="result" id="kit-result"></div>
+    </section>
+
+    <!-- ================= SCAN ================= -->
+    <section class="panel" id="tab-scan" style="display:none">
+      <h2>📸 Photo hazard scanner</h2>
+      <p class="hint">Photograph your street, entrance, terrace or meter box — Gemini spots monsoon hazards and tells you the fix. If nothing is visible, it says so honestly.</p>
+      <form class="grid" id="scan-form">
+        <div class="full"><label>Photo (JPEG/PNG/WebP, max 6 MB)</label>
+          <input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required /></div>
+        <div class="full"><button class="primary" type="submit">Scan for hazards</button></div>
+      </form>
+      <div class="result" id="scan-result"></div>
+    </section>
+
+    <!-- ================= ALERTS ================= -->
+    <section class="panel" id="tab-alerts" style="display:none">
+      <h2>🚨 Real-time alerts</h2>
+      <p class="hint">Current IMD / official warnings for your city, grounded in live Google Search with citations — never invented.</p>
+      <form class="grid" id="alerts-form">
+        <div><label>City</label><input name="city" required minlength="2" maxlength="120" placeholder="Chennai" /></div>
+        <div class="full"><button class="primary" type="submit">Check current alerts</button></div>
+      </form>
+      <div class="result" id="alerts-result"></div>
+    </section>
+
+    <!-- ================= ADVISORY ================= -->
+    <section class="panel" id="tab-advisory" style="display:none">
+      <h2>🚆 Travel advisory</h2>
+      <p class="hint">Route-specific monsoon travel guidance — disruptions, waterlogging, and a clear go / delay / avoid call, with sources.</p>
+      <form class="grid" id="advisory-form">
+        <div><label>From</label><input name="origin" required minlength="2" maxlength="120" placeholder="Pune" /></div>
+        <div><label>To</label><input name="destination" required minlength="2" maxlength="120" placeholder="Mumbai" /></div>
+        <div><label>When</label><input name="travel_date" maxlength="40" value="today" /></div>
+        <div><label>Mode</label>
+          <select name="mode">
+            <option value="any">Any</option><option value="road">Road</option>
+            <option value="rail">Rail</option><option value="air">Air</option>
+          </select>
+        </div>
+        <div class="full"><button class="primary" type="submit">Get advisory</button></div>
+      </form>
+      <div class="result" id="advisory-result"></div>
+    </section>
+  </div>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

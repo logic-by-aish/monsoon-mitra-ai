@@ -1,0 +1,19 @@
+# --- secrets / env: never commit ---
+.env
+.env.*
+!.env.example
+*serviceAccount*.json
+*service-account*.json
+gcp-key*.json
+firebase-adminsdk*.json
+
+# --- python ---
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# --- misc ---
+.DS_Store
+*.log

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign in — MonsoonMitra.ai</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="auth-wrap">
+    <section class="panel">
+      <h1>🌧️ MonsoonMitra.ai</h1>
+      <p class="sub">Your AI companion for monsoon preparedness — plans, checklists, alerts &amp; more in your language.</p>
+
+      <form id="auth-form">
+        <div>
+          <label for="email">Email</label>
+          <input id="email" type="email" autocomplete="email" required />
+        </div>
+        <div>
+          <label for="password">Password</label>
+          <input id="password" type="password" autocomplete="current-password" minlength="6" required />
+        </div>
+        <button class="primary" type="submit" id="submit-btn">Sign in</button>
+      </form>
+
+      <div class="divider">or</div>
+      <button class="google" id="google-btn">Continue with Google</button>
+
+      <div class="switch-link" id="switch-line">
+        New here? <a id="switch-mode">Create an account</a>
+      </div>
+      <div id="error" class="error-box" style="display:none"></div>
+    </section>
+  </div>
+
+  <script type="module">
+    import { getFirebase, escapeHtml } from "/firebase-init.js";
+
+    const fb = await getFirebase();
+    fb.onAuthStateChanged(fb.auth, (user) => { if (user) window.location.replace("/app.html"); });
+
+    let mode = "signin";
+    const errBox = document.getElementById("error");
+    const submitBtn = document.getElementById("submit-btn");
+
+    const FRIENDLY = {
+      "auth/invalid-credential": "Wrong email or password. Try again.",
+      "auth/user-not-found": "No account with that email — switch to Create an account.",
+      "auth/wrong-password": "Wrong email or password. Try again.",
+      "auth/email-already-in-use": "That email already has an account — sign in instead.",
+      "auth/weak-password": "Password must be at least 6 characters.",
+      "auth/invalid-email": "That doesn't look like a valid email.",
+      "auth/popup-closed-by-user": "Google sign-in was cancelled.",
+      "auth/too-many-requests": "Too many attempts — wait a minute and retry.",
+    };
+
+    function showError(e) {
+      errBox.style.display = "block";
+      errBox.innerHTML = escapeHtml(FRIENDLY[e?.code] || "Sign-in failed. Please retry.");
+    }
+
+    document.getElementById("switch-mode").addEventListener("click", () => {
+      mode = mode === "signin" ? "signup" : "signin";
+      submitBtn.textContent = mode === "signin" ? "Sign in" : "Create account";
+      document.getElementById("switch-line").firstChild.textContent =
+        mode === "signin" ? "New here? " : "Already registered? ";
+      document.getElementById("switch-mode").textContent =
+        mode === "signin" ? "Create an account" : "Sign in instead";
+      errBox.style.display = "none";
+    });
+
+    document.getElementById("auth-form").addEventListener("submit", async (ev) => {
+      ev.preventDefault();
+      errBox.style.display = "none";
+      submitBtn.disabled = true;
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      try {
+        if (mode === "signin") {
+          await fb.signInWithEmailAndPassword(fb.auth, email, password);
+        } else {
+          await fb.createUserWithEmailAndPassword(fb.auth, email, password);
+        }
+        window.location.replace("/app.html");
+      } catch (e) { showError(e); } finally { submitBtn.disabled = false; }
+    });
+
+    document.getElementById("google-btn").addEventListener("click", async () => {
+      errBox.style.display = "none";
+      try {
+        await fb.signInWithPopup(fb.auth, new fb.GoogleAuthProvider());
+        window.location.replace("/app.html");
+      } catch (e) { showError(e); }
+    });
+  </script>
+</body>
+</html>
