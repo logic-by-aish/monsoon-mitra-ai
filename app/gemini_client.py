@@ -19,9 +19,13 @@ from .config import Settings, get_settings
 
 
 def _is_model_availability_error(exc: Exception) -> bool:
-    """404 (model id retired) or 503 (model overloaded) — retry-able on fallback."""
+    """404 (model id retired), 503 (overloaded) or 429 (per-model quota exhausted —
+    the fallback model has its own quota bucket) — all retry-able on fallback."""
     msg = str(exc)
-    return any(m in msg for m in ("404", "NOT_FOUND", "not found", "503", "UNAVAILABLE", "overloaded"))
+    return any(m in msg for m in (
+        "404", "NOT_FOUND", "not found", "503", "UNAVAILABLE", "overloaded",
+        "429", "RESOURCE_EXHAUSTED",
+    ))
 
 
 class GeminiClient:
